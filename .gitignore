@@ -1,3 +1,6 @@
 __pycache__
 .venv
 .vscode
+chromedriver.exe
+spider.py
+test.sq3

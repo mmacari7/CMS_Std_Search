@@ -5,7 +5,9 @@ import os
 import csv
 import string
 import sqlite3
+from fuzzywuzzy import process
 
+# Class with functions for CMS -> SQL Conversions
 class CMS2SQL:
     def __init__(self, dbname):
         # List of codes and medical abbreviations to try to aid the matching search engine
@@ -40,15 +42,14 @@ class CMS2SQL:
     # Function to process the CSV files and attempt to standardize the data
     def processCSV(self, fileobj):
         for k,v in fileobj.items():
-            
+            idcount = 0
             # Dictionary to store description and prices, passed to generate the SQL db
             # Key also passed as hospital name for sql db
             csvfile = open(v)
             csvreader = csv.reader(csvfile, delimiter=',')
 
-            # Sets our data dictionary which will be written to the sql
-            d = {"procedure": [], "price": []}
-
+            # Sets data tuple for SQL Insertions
+            tup = []
             for row in csvreader:
                 # Skips the column titles
                 if(row[0] == 'Description'):
@@ -81,25 +82,33 @@ class CMS2SQL:
                 
                 # Strips the last bit of whitespace
                 newstring = newstring.strip()
-                
-                d["procedure"].append(newstring)
-                d["price"].append(pstrip)
-            
-            print("Processed " + k + " CMS CSV")
+
+                tup.append((idcount, newstring, pstrip))
+
+                idcount += 1
+
             # Calls the function to write the data to sql
-            self.write_to_sql(k, d)
+            self.write_to_sql(k, tup)
 
         return
     
     # Function to write the data to the SQL in a table
     def write_to_sql(self, tbname, data):
-        print(tbname, len(data["procedure"]))
         
         db = sqlite3.connect(self.dbname)
+        c = db.cursor()
+        tbname = tbname.strip()
+        
+        # Creates a table in our SQL file with name if it doesnt exist already
+        c.execute('create table if not exists [' + tbname + '] (_id text, Service text, Price text)')
+        db.commit()
 
+        print("Inserting data into " + tbname)
 
+        c.executemany("insert into [" + tbname + "] (_id, Service, Price) values (?,?,?)", data)
+        db.commit()
 
-
+        print("    Written: " + str(len(data)) + " entries into db \n")
         return
 
 # Pass test as the DB name
