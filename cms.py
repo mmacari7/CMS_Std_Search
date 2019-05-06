@@ -111,5 +111,3 @@ class CMS2SQL:
         print("    Written: " + str(len(data)) + " entries into db \n")
         return
 
-# Pass test as the DB name
-mycms = CMS2SQL("test")

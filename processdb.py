@@ -45,7 +45,12 @@ class Dbdata:
         return
 
     # String matches by levenshtein distance using fuzzy wuzzy
-    def search(self, ss, limit=4, gettime=False): # Limit defaults 4 unless passed more, time defaults false -> Used for debugging
+    def proto1sch(self, ss, limit=4, gettime=False): # Limit defaults 4 unless passed more, time defaults false -> Used for debugging
+        
+        # If the given string has already been a search term
+        if(ss in self.searches.keys()):
+            return(self.searches[ss])
+    
         # Sets our return obj
         d = {}
 
@@ -80,10 +85,11 @@ class Dbdata:
             print(elapsed_time)
 
         # Return the results of the search
+        self.searches[ss] = d
         return(d)
     
     # Explored alternative search fuzzmatch slightly quicker less accurate
-    def searchAltern(self, ss, l=4, gettime=False):
+    def proto2sch(self, ss, l=4, gettime=False):
         if(gettime):
             start_time = time.time()
 
@@ -128,14 +134,3 @@ class Dbdata:
         res = list(map(lambda x: x[1], dtup))
         return(res)
 
-
-
-
-mydbdata = Dbdata("test.sq3")
-#mydbdata.extract_from_table(mydbdata.tables[0])
-mydbdata.extractAll()
-
-
-
-search1 = mydbdata.search("insulin injection", limit=2, gettime=True)
-print(search1)

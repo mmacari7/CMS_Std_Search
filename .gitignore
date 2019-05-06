@@ -3,4 +3,4 @@ __pycache__
 .vscode
 chromedriver.exe
 spider.py
-test.sq3
+mydb.sq3
